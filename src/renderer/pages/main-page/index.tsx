@@ -1,19 +1,18 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import SideBar from "./components/SideBar";
 import PluginManagerView from "./views/plugin-manager-view";
 import MusicSheetView from "./views/music-sheet-view";
 import SearchView from "./views/search-view";
 import AlbumView from "./views/album-view";
 import ArtistView from "./views/artist-view";
-import ToplistView from "./views/toplist-view";
-import TopListDetailView from "./views/toplist-detail-view";
-import RecommendSheetsView from "./views/recommend-sheets-view";
 import SettingView from "./views/setting-view";
 import LocalMusicView from "./views/local-music-view";
 import Empty from "@/renderer/components/Empty";
 import DownloadView from "./views/download-view";
 import ThemeView from "./views/theme-view";
 import RecentlyPlayView from "./views/recently-play-view";
+import { defaultSheet } from "@/renderer/core/music-sheet";
+import { localPluginName } from "@/common/constant";
 
 import "./index.scss";
 
@@ -22,6 +21,15 @@ export default function MainPage() {
     <>
       <SideBar></SideBar>
       <Routes>
+        <Route
+          index
+          element={
+            <Navigate
+              replace
+              to={`musicsheet/${encodeURIComponent(localPluginName)}/${encodeURIComponent(defaultSheet.id)}`}
+            ></Navigate>
+          }
+        ></Route>
         <Route path="search/:query" element={<SearchView></SearchView>}></Route>
         <Route
           path="plugin-manager-view"
@@ -38,15 +46,6 @@ export default function MainPage() {
         <Route
           path="artist/:platform/:id"
           element={<ArtistView></ArtistView>}
-        ></Route>
-        <Route path="toplist" element={<ToplistView></ToplistView>}></Route>
-        <Route
-          path="toplist-detail/:platform"
-          element={<TopListDetailView></TopListDetailView>}
-        ></Route>
-        <Route
-          path="recommend-sheets"
-          element={<RecommendSheetsView></RecommendSheetsView>}
         ></Route>
         <Route
           path="local-music"

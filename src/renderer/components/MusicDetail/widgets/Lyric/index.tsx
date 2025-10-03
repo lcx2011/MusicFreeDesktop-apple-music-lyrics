@@ -1,7 +1,8 @@
+import "./style/index.css";
 import "./index.scss";
-import Condition, { IfTruthy } from "@/renderer/components/Condition";
+import Condition from "@/renderer/components/Condition";
 import Loading from "@/renderer/components/Loading";
-import { useEffect, useRef, useState } from "react";
+import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { showCustomContextMenu } from "@/renderer/components/ContextMenu";
 import {
   getUserPreference,
@@ -15,16 +16,16 @@ import LyricParser from "@/renderer/utils/lyric-parser";
 import { getLinkedLyric, unlinkLyric } from "@/renderer/core/link-lyric";
 import { getMediaPrimaryKey } from "@/common/media-util";
 import { useTranslation } from "react-i18next";
-import {useLyric} from "@renderer/core/track-player/hooks";
+import { useLyric } from "@renderer/core/track-player/hooks";
 import trackPlayer from "@renderer/core/track-player";
-import {dialogUtil, fsUtil} from "@shared/utils/renderer";
+import { dialogUtil, fsUtil } from "@shared/utils/renderer";
 
 export default function Lyric() {
   const lyricContext = useLyric();
   const lyricParser = lyricContext?.parser;
   const currentLrc = lyricContext?.currentLrc;
 
-  const containerRef = useRef<HTMLDivElement>();
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const [fontSize, setFontSize] = useState<string | null>(
     getUserPreference("inlineLyricFontSize")
@@ -36,27 +37,61 @@ export default function Lyric() {
 
   const mountRef = useRef(false);
 
+  const lyricItems = useMemo(() => lyricParser?.getLyricItems?.() ?? [], [
+    lyricParser,
+  ]);
+
+  const lyricContainerStyle: CSSProperties | undefined = useMemo(() => {
+    if (!fontSize) return undefined;
+    return {
+      fontSize: `${fontSize}px`,
+      ["--amll-lp-font-size" as any]: `${fontSize}px`,
+    };
+  }, [fontSize]);
+
+  const showTranslationEnabled =
+    !!showTranslation && (lyricParser?.hasTranslation ?? false);
+
+  const activeIndex = currentLrc?.index ?? -1;
+
   useEffect(() => {
-    if (containerRef.current) {
-      const currentIndex = lyricContext?.currentLrc?.index;
-      if (currentIndex >= 0) {
-        const dom = document.querySelector(`#lyric-item-id-${currentIndex}`) as
-          | HTMLDivElement
-          | undefined;
-        if (dom) {
-          const offsetTop =
-            dom.offsetTop -
-            containerRef.current.clientHeight / 2 +
-            dom.clientHeight / 2;
-          containerRef.current.scrollTo({
-            behavior: mountRef.current ? "smooth" : "auto",
-            top: offsetTop,
-          });
-        }
+    const container = containerRef.current;
+    if (!container) return;
+    const currentIndex = lyricContext?.currentLrc?.index;
+    if (typeof currentIndex === "number" && currentIndex >= 0) {
+      const dom = container.querySelector<HTMLDivElement>(
+        `#lyric-item-id-${currentIndex}`
+      );
+      if (dom) {
+        const targetTop =
+          dom.offsetTop - container.clientHeight * 0.05 + dom.clientHeight / 1.2;
+        container.scrollTo({
+          behavior: mountRef.current ? "smooth" : "auto",
+          top: targetTop,
+        });
       }
     }
     mountRef.current = true;
-  }, [currentLrc]);
+  }, [lyricContext?.currentLrc?.index, lyricItems.length]);
+
+  const handleSearchLyric = () => {
+    const currentMusic = trackPlayer.currentMusic;
+    showModal("SearchLyric", {
+      defaultTitle: currentMusic?.title,
+      musicItem: currentMusic,
+    });
+  };
+
+  const emptyState = (
+    <div className="lyric-empty-state">
+      <div className="amll-lyric-line">
+        <div className="amll-lyric-main">{t("music_detail.no_lyric")}</div>
+      </div>
+      <div className="lyric-item search-lyric" role="button" onClick={handleSearchLyric}>
+        {t("music_detail.search_lyric")}
+      </div>
+    </div>
+  );
 
   const optionsComponent = (
     <div className="lyric-options-container">
@@ -80,7 +115,7 @@ export default function Lyric() {
   return (
     <div className="lyric-container-outer">
       <div
-        className="lyric-container"
+        className="lyric-container amll-lyric-player dom"
         data-loading={lyricContext === null}
         onContextMenu={(e) => {
           showCustomContextMenu({
@@ -96,68 +131,64 @@ export default function Lyric() {
             ),
           });
         }}
-        style={
-          fontSize
-            ? {
-                fontSize: `${fontSize}px`,
-              }
-            : null
-        }
+        style={lyricContainerStyle}
         ref={containerRef}
       >
-        {
-          <Condition
-            condition={lyricContext !== null}
-            falsy={<Loading></Loading>}
-          >
-            <Condition
-              condition={lyricParser}
-              falsy={
-                <>
-                  <div className="lyric-item">{t("music_detail.no_lyric")}</div>
-                  <div
-                    className="lyric-item search-lyric"
-                    role="button"
-                    onClick={() => {
-                        const currentMusic = trackPlayer.currentMusic;
-                      showModal("SearchLyric", {
-                        defaultTitle: currentMusic?.title,
-                        musicItem: currentMusic,
-                      });
-                    }}
-                  >
-                    {t("music_detail.search_lyric")}
-                  </div>
-                </>
-              }
-            >
-              {lyricParser?.getLyricItems?.()?.map((lyricItem, index) => (
-                <>
+        <Condition
+          condition={lyricContext !== null}
+          falsy={<Loading></Loading>}
+        >
+          <Condition condition={lyricParser} falsy={emptyState}>
+            <div className="amll-lyric-player-static">
+              {lyricItems.map((lyricItem, index) => {
+                const isActive = currentLrc?.index === index;
+                const distanceFromActive =
+                  activeIndex >= 0 ? Math.abs(activeIndex - index) : index;
+                const isPast = activeIndex >= 0 && index < activeIndex;
+                const state = isActive
+                  ? "current"
+                  : isPast
+                  ? "past"
+                  : "future";
+
+                const cappedDistance = Math.min(distanceFromActive, 3);
+                const blurLevels = [0, 0.6, 1, 2];
+                const opacityLevels = [1, 0.88, 0.68, 0.5];
+                const scaleLevels = [1, 0.98, 0.98, 0.97];
+                const blurAmount = blurLevels[cappedDistance];
+                const opacity = opacityLevels[cappedDistance];
+                const scale = scaleLevels[cappedDistance];
+
+                const lineStyle: CSSProperties = {
+                  opacity,
+                  transform: `translateZ(0) scale(${scale.toFixed(3)})`,
+                } as CSSProperties;
+                (lineStyle as any)["--lyric-blur"] = `${blurAmount}px`;
+                (lineStyle as any)["--lyric-distance"] = distanceFromActive;
+
+                return (
                   <div
                     key={index}
-                    className="lyric-item"
+                    className="amll-lyric-line"
                     id={`lyric-item-id-${index}`}
-                    data-highlight={currentLrc?.index === index}
+                    data-active={isActive}
+                    data-state={state}
+                    style={lineStyle}
                   >
-                    {lyricItem.lrc}
-                  </div>
-                  <IfTruthy
-                    condition={lyricParser?.hasTranslation && showTranslation}
-                  >
-                    <div
-                      key={"tr" + index}
-                      className="lyric-item lyric-item-translation"
-                      id={`tr-lyric-item-id-${index}`}
-                      data-highlight={currentLrc?.index === index}
-                    >
-                      {lyricItem.translation}
+                    <div className="amll-lyric-main">
+                      {lyricItem.lrc || "\u00A0"}
                     </div>
-                  </IfTruthy>
-                </>
-              ))}
-            </Condition>
+                    {showTranslationEnabled && (
+                      <div className="amll-lyric-sub">
+                        {lyricItem.translation || "\u00A0"}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </Condition>
-        }
+        </Condition>
       </div>
       {optionsComponent}
     </div>

@@ -10,6 +10,7 @@ import {useTranslation} from "react-i18next";
 import {useCurrentMusic} from "@renderer/core/track-player/hooks";
 import {useEffect} from "react";
 import {musicDetailShownStore} from "@renderer/components/MusicDetail/store";
+import FluidBackground from "./FluidBackground";
 
 export const isMusicDetailShown = musicDetailShownStore.getValue;
 export const useMusicDetailShown = musicDetailShownStore.useValue;
@@ -51,12 +52,7 @@ function MusicDetail() {
         }, 200);
       }}
     >
-      <div
-        className="music-detail-background"
-        style={{
-          backgroundImage: `url(${musicItem?.artwork ?? albumImg})`,
-        }}
-      ></div>
+      <FluidBackground artwork={musicItem?.artwork} fallback={albumImg} />
       <Header></Header>
       <div className="music-title" title={musicItem?.title}>
         {musicItem?.title || t("media.unknown_title")}

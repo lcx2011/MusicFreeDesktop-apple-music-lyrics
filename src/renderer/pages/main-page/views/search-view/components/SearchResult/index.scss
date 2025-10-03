@@ -24,3 +24,13 @@
     }
   }
 }
+
+.search-result--music-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+
+  & .song-card-grid {
+    justify-items: center;
+  }
+}

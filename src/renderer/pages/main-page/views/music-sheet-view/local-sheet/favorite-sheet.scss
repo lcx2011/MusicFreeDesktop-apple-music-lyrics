@@ -1,0 +1,105 @@
+
+.favorite-sheet-container {
+  display: flex;
+  flex-direction: column;
+  padding: 24px 0;
+  gap: 24px;
+
+  .favorite-sheet-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    &__actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    &__summary {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.95rem;
+      opacity: 0.75;
+    }
+
+    &__btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.04);
+      color: inherit;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+
+      &:hover:not([disabled]) {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.28);
+      }
+
+      &[disabled] {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      svg {
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+
+  .favorite-sheet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 60px;
+
+    &__item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 8px;
+
+      &-cover {
+        width: 150px;
+        height: 150px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        svg {
+          width: 48px;
+          height: 48px;
+          opacity: 0.6;
+        }
+      }
+
+      &-title {
+        font-size: 0.95rem;
+        line-height: 1.2;
+        max-width: 100%;
+        word-break: break-word;
+
+        &.no-title {
+          opacity: 0.6;
+        }
+      }
+    }
+  }
+}

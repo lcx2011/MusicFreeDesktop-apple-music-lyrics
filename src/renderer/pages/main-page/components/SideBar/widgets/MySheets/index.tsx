@@ -16,7 +16,9 @@ export default function MySheets() {
     `/main/musicsheet/${encodeURIComponent(localPluginName)}/:sheetId`
   );
   const currentSheetId = sheetIdMatch?.params?.sheetId;
-  const musicSheets = MusicSheet.frontend.useAllSheets();
+  const musicSheets = MusicSheet.frontend
+    .useAllSheets()
+    .filter((item) => item.id !== defaultSheet.id);
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -58,7 +60,7 @@ export default function MySheets() {
             <ListItem
               key={item.id}
               iconName={
-                item.id === defaultSheet.id ? "heart-outline" : "musical-note"
+                "musical-note"
               }
               onClick={() => {
                 currentSheetId !== item.id &&

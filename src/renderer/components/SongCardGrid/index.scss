@@ -1,0 +1,74 @@
+.song-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 60px;
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    cursor: pointer;
+    outline: none;
+    transition: transform 0.18s ease;
+
+    &:focus-visible {
+      box-shadow: 0 0 0 2px rgba(var(--primaryColorRGB, 255, 255, 255), 0.35);
+      border-radius: 16px;
+    }
+  }
+
+  &__cover {
+    width: 150px;
+    height: 150px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    > img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    > svg {
+      width: 48px;
+      height: 48px;
+      opacity: 0.6;
+    }
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    max-width: 150px;
+    color: inherit;
+
+    > span {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+  }
+
+  &__title {
+    font-size: 0.98rem;
+  }
+
+  &__artist {
+    font-size: 0.9rem;
+    opacity: 0.75;
+  }
+
+  &__separator {
+    opacity: 0.4;
+  }
+}

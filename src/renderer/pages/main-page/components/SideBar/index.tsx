@@ -4,23 +4,19 @@ import MySheets from "./widgets/MySheets";
 import { useMatch, useNavigate } from "react-router";
 import StarredSheets from "./widgets/StarredSheets";
 import { useTranslation } from "react-i18next";
+import { defaultSheet } from "@/renderer/core/music-sheet";
+import { localPluginName } from "@/common/constant";
 
 export default function () {
   const navigate = useNavigate();
   const routePathMatch = useMatch("/main/:routePath");
+  const favoriteSheetRoute = `/main/musicsheet/${encodeURIComponent(
+    localPluginName
+  )}/${encodeURIComponent(defaultSheet.id)}`;
+  const favoriteSheetMatch = useMatch(favoriteSheetRoute);
   const { t } = useTranslation();
 
   const options = [
-    {
-      iconName: "trophy",
-      title: t("side_bar.toplist"),
-      route: "toplist",
-    },
-    {
-      iconName: "fire",
-      title: t("side_bar.recommend_sheets"),
-      route: "recommend-sheets",
-    },
     {
       iconName: "array-download-tray",
       title: t("side_bar.download_management"),
@@ -45,6 +41,18 @@ export default function () {
 
   return (
     <div className="side-bar-container">
+      <ListItem
+        iconName="heart-outline"
+        title={t("media.default_favorite_sheet_name")}
+        selected={Boolean(favoriteSheetMatch)}
+        onClick={() => {
+          navigate(
+            `/main/musicsheet/${encodeURIComponent(
+              localPluginName
+            )}/${encodeURIComponent(defaultSheet.id)}`
+          );
+        }}
+      ></ListItem>
       {options.map((item) => (
         <ListItem
           key={item.route}
