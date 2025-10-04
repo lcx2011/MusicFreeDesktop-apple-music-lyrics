@@ -8,13 +8,40 @@ export const rules: Required<ModuleOptions>['rules'] = [
     test: /native_modules[/\\].+\.node$/,
     use: 'node-loader',
   },
+  // Handle .cjs files from @applemusic-like-lyrics FIRST
   {
-    test: /[/\\]node_modules[/\\].+\.(m?js|node)$/,
+    test: /\.cjs$/,
+    include: /node_modules[\\/]@applemusic-like-lyrics/,
+    type: 'javascript/auto',
+  },
+  {
+    test: /[/\\]node_modules[/\\].+\.(?:mjs|node)$/,
+    exclude: [
+      /[/\\]node_modules[/\\]@applemusic-like-lyrics[/\\]/,
+      /pixi/,
+    ],
     parser: { amd: false },
     use: {
       loader: '@vercel/webpack-asset-relocator-loader',
       options: {
         outputAssetBase: 'native_modules',
+        wrapperCompatibility: true,
+      },
+    },
+  },
+  {
+    test: /[/\\]node_modules[/\\].+\.js$/,
+    exclude: [
+      /[/\\]node_modules[/\\]@applemusic-like-lyrics[/\\]/,
+      /\.cjs$/,
+      /pixi/,
+    ],
+    parser: { amd: false },
+    use: {
+      loader: '@vercel/webpack-asset-relocator-loader',
+      options: {
+        outputAssetBase: 'native_modules',
+        wrapperCompatibility: true,
       },
     },
   },

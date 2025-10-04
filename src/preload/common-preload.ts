@@ -11,3 +11,4 @@ import "@shared/utils/preload";
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
 contextBridge.exposeInMainWorld("path", path);
+contextBridge.exposeInMainWorld("__dirname", __dirname);
