@@ -17,7 +17,7 @@ import {musicDetailShownStore} from "@renderer/components/MusicDetail/store";
 import {LyricPlayer, BackgroundRender, type LyricLine} from "@applemusic-like-lyrics/react";
 import{PrebuiltLyricPlayer} from "@applemusic-like-lyrics/react-full";
 import {PlayerState} from "@/common/constant";
-import { EplorRenderer } from '@applemusic-like-lyrics/core';
+import { EplorRenderer } from "@applemusic-like-lyrics/core";
 export const isMusicDetailShown = musicDetailShownStore.getValue;
 export const useMusicDetailShown = musicDetailShownStore.useValue;
 
@@ -139,7 +139,7 @@ console.log(lyricLines);
           <div className="music-detail--lyric">
             {lyricLines.length > 0 ? (
               
-              <PrebuiltLyricPlayer
+              <LyricPlayer
                 lyricLines={lyricLines}
                 currentTime={currentTimeMs+500}
                 style={{ width: "100%", height: "100%" }}
