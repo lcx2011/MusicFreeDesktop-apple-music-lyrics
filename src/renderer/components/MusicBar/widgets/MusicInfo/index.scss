@@ -1,132 +1,88 @@
-$width: 290px;
+.music-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
 
-.music-info-outer-container {
-  width: $width;
-  height: 100%;
+  &.music-info--empty {
+    height: 64px;
+  }
+
+  &[data-detail-shown="true"] .music-cover-mask {
+    opacity: 1;
+  }
+}
+
+.music-cover-wrapper {
   position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
   overflow: hidden;
+  flex-shrink: 0;
+
+  &:hover .music-cover-mask {
+    opacity: 1;
+  }
 }
 
-.music-info-content-container {
-  position: relative;
-  height: 100%;
+.music-cover {
   width: 100%;
-  display: flex;
-  align-items: center;
-  transition: transform 0.3s ease;
-
-  &[data-detail-shown="true"] {
-    transform: translateY(-100%);
-  }
+  height: 100%;
+  object-fit: cover;
 }
 
-.music-info-operations-container {
-  box-sizing: border-box;
-  padding: 0 12px;
+.music-cover-mask {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 1rem;
-
-  & div[role='button'] {
-    width: 22px;
-    height: 22px;
-  }
-
-  & .music-info-operation-divider {
-    height: 40%;
-    width: 1px;
-    background: var(--dividerColor);
-  }
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.2));
+  color: #fff;
+  opacity: 0;
+  transition: opacity 160ms ease;
 }
 
-// 左边的信息区域
-.music-info-container {
-  box-sizing: border-box;
-  position: relative;
+.music-meta {
   display: flex;
-  align-items: center;
-  width: $width;
-  height: 48px;
-  /* border-right: 1px solid var(--dividerColor); */
-  padding-left: 10px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+}
 
-  & .open-detail {
-    width: 44px;
-    height: 44px;
-    color: rgba($color: white, $alpha: 0.5);
-    position: absolute;
-    left: 10px;
-    top: 2px;
-    transition: all 200ms linear;
-    opacity: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba($color: #000000, $alpha: 0.5);
-    border-radius: 4px;
+.music-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-    & svg {
-      width: 28px;
-      height: 28px;
-    }
+.music-artist {
+  font-size: 0.95rem;
+  line-height: 1.2;
+  opacity: 0.75;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-    &:hover {
-      opacity: 1;
-      backdrop-filter: blur(5px);
-    }
+@media (max-width: 720px) {
+  .music-cover-wrapper {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
   }
 
-  & .music-cover {
-    width: 44px;
-    height: 44px;
-    object-fit: cover;
-    flex-shrink: 0;
-    border-radius: 4px;
-  }
-
-  & .music-info {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    margin-left: 10px;
-    width: 226px;
-    height: 48px;
-    padding: 8px 8px 8px 0;
+  .music-title {
     font-size: 1rem;
+  }
 
-    & .music-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 1.1rem;
-      & span {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        cursor: pointer;
-      }
-    }
-
-    & .music-artist {
-      display: flex;
-      align-items: center;
-
-      & div {
-        opacity: 0.8;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        margin-right: 0.5rem;
-      }
-
-      & .artist {
-        flex: 1;
-      }
-
-      & .progress {
-        flex-shrink: 0;
-      }
-    }
+  .music-artist {
+    font-size: 0.85rem;
   }
 }

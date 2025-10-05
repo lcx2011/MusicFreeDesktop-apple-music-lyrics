@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "./index.scss";
 import trackPlayer from "@renderer/core/track-player";
 import {useProgress} from "@renderer/core/track-player/hooks";
@@ -8,23 +8,41 @@ export default function Slider() {
   const seekPercentRef = useRef<number | null>(null);
   const { currentTime, duration } = useProgress();
   const isPressedRef = useRef(false);
+  const sliderRef = useRef<HTMLDivElement | null>(null);
 
   function setSeekPercent(value: number | null) {
     _setSeekPercent(value);
     seekPercentRef.current = value;
   }
 
+  const getPercent = useCallback((clientX: number) => {
+    const rect = sliderRef.current?.getBoundingClientRect();
+    if (!rect || rect.width === 0) {
+      return null;
+    }
+    const percent = (clientX - rect.left) / rect.width;
+    return Math.max(0, Math.min(1, percent));
+  }, []);
+
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
       if (isPressedRef.current) {
-        setSeekPercent(Math.max(0, Math.min(1, e.clientX / window.innerWidth)));
+        const percent = getPercent(e.clientX);
+        if (percent !== null) {
+          setSeekPercent(percent);
+        }
       }
     };
     const onMouseUp = (e: MouseEvent) => {
       if (isPressedRef.current) {
         isPressedRef.current = false;
-        const realProgress = trackPlayer.progress;
-        trackPlayer.seekTo(realProgress.duration * seekPercentRef.current);
+        const percent = getPercent(e.clientX) ?? seekPercentRef.current;
+        const targetDuration = isFinite(duration) && duration
+          ? duration
+          : trackPlayer.progress.duration;
+        if (percent !== null && targetDuration) {
+          trackPlayer.seekTo(targetDuration * percent);
+        }
         setSeekPercent(null);
       }
     };
@@ -34,18 +52,26 @@ export default function Slider() {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
     };
-  }, []);
+  }, [duration, getPercent]);
   return (
     <div
       className="music-bar--slider-container"
+      ref={sliderRef}
       onMouseDown={(e) => {
         if (isFinite(duration) && duration) {
           isPressedRef.current = true;
+          const percent = getPercent(e.clientX);
+          if (percent !== null) {
+            setSeekPercent(percent);
+          }
         }
       }}
       onClick={(e) => {
         if (isFinite(duration) && duration) {
-          trackPlayer.seekTo((duration * e.clientX) / window.innerWidth);
+          const percent = getPercent(e.clientX);
+          if (percent !== null) {
+            trackPlayer.seekTo(duration * percent);
+          }
         }
       }}
     >

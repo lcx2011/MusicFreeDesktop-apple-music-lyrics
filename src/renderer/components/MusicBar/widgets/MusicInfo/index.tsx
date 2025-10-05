@@ -2,21 +2,15 @@ import SvgAsset from "@/renderer/components/SvgAsset";
 import {setFallbackAlbum} from "@/renderer/utils/img-on-error";
 import "./index.scss";
 
-import Tag from "@/renderer/components/Tag";
-import {secondsToDuration} from "@/common/time-util";
-import MusicFavorite from "@/renderer/components/MusicFavorite";
 import MusicDetail, {useMusicDetailShown} from "@/renderer/components/MusicDetail";
 import albumImg from "@/assets/imgs/album-cover.jpg";
 import {useTranslation} from "react-i18next";
-import {useCurrentMusic, useProgress} from "@renderer/core/track-player/hooks";
-import {hidePanel, showPanel} from "@renderer/components/Panel";
-import MusicDownloaded from "@renderer/components/MusicDownloaded";
-import PluginManager from "@shared/plugin-manager/renderer";
+import {useCurrentMusic} from "@renderer/core/track-player/hooks";
+import {hidePanel} from "@renderer/components/Panel";
 
 export default function MusicInfo() {
     const musicItem = useCurrentMusic();
     const musicDetailShown = useMusicDetailShown();
-
     const {t} = useTranslation();
 
     function toggleMusicDetail() {
@@ -28,95 +22,39 @@ export default function MusicInfo() {
         }
     }
 
-    return (
-        <div className="music-info-outer-container">
-            <div data-detail-shown={musicDetailShown} className="music-info-content-container">
-                <div className="music-info-container">
-                    {!musicItem ? null : (
-                        <>
-                            <img
-                                role="button"
-                                className="music-cover"
-                                crossOrigin="anonymous"
-                                src={musicItem.artwork ?? albumImg}
-                                onError={setFallbackAlbum}
-                            ></img>
+    if (!musicItem) {
+        return <div className="music-info empty">{t("music_bar.no_music")}</div>;
+    }
 
-                            <div
-                                className="open-detail"
-                                role="button"
-                                title={musicDetailShown ? t("music_bar.close_music_detail_page") : t("music_bar.open_music_detail_page")}
-                                onClick={toggleMusicDetail}
-                            >
-                                <SvgAsset
-                                    iconName={
-                                        musicDetailShown ? "chevron-double-down" : "chevron-double-up"
-                                    }
-                                ></SvgAsset>
-                            </div>
-                            <div className="music-info">
-                                <div className="music-title">
-                                  <span role="button" onClick={toggleMusicDetail}
-                                        title={musicItem.title}>{musicItem.title}</span>
-                                    <Tag
-                                        fill
-                                        style={{
-                                            fontSize: "0.9rem",
-                                        }}
-                                    >
-                                        {musicItem.platform}
-                                    </Tag>
-                                </div>
-                                <div className="music-artist">
-                                    <div className="artist">{musicItem.artist}</div>
-                                    <Progress></Progress>
-                                    <MusicFavorite musicItem={musicItem} size={18}></MusicFavorite>
-                                </div>
-                            </div>
-                        </>
-                    )}
-                </div>
-            </div>
-            <div data-detail-shown={musicDetailShown}
-                 className="music-info-content-container music-info-operations-container">
-                <div
-                    className="open-detail"
-                    role="button"
-                    title={musicDetailShown ? t("music_bar.close_music_detail_page") : t("music_bar.open_music_detail_page")}
-                    onClick={toggleMusicDetail}
-                >
+    return (
+        <div className="music-info" data-detail-shown={musicDetailShown}>
+            <div className="music-cover-wrapper" role="button" onClick={toggleMusicDetail}>
+                <img
+                    className="music-cover"
+                    crossOrigin="anonymous"
+                    src={musicItem.artwork ?? albumImg}
+                    onError={setFallbackAlbum}
+                    alt={musicItem.title}
+                />
+                <div className="music-cover-mask">
                     <SvgAsset
-                        iconName={
-                            musicDetailShown ? "chevron-double-down" : "chevron-double-up"
-                        }
+                        iconName={musicDetailShown ? "chevron-double-down" : "chevron-double-up"}
                     ></SvgAsset>
                 </div>
-                <MusicFavorite musicItem={musicItem} size={22}></MusicFavorite>
-                <MusicDownloaded musicItem={musicItem} size={22}></MusicDownloaded>
-                <div role="button"
-                     data-disabled={!PluginManager.isSupportFeatureMethod(musicItem?.platform, "getMusicComments")}
-                     onClick={() => {
-                         showPanel("MusicComment", {
-                             musicItem: musicItem,
-                             coverHeader: true
-                         })
-                     }}>
-                    <SvgAsset iconName="chat-bubble-left-ellipsis" size={22}></SvgAsset>
-                </div>
-                <div className="music-info-operation-divider"></div>
-                <Progress></Progress>
             </div>
-        </div>
-    );
-}
-
-function Progress() {
-    const {currentTime, duration} = useProgress();
-    return (
-        <div className="progress">
-            {isFinite(duration)
-                ? `${secondsToDuration(currentTime)}/${secondsToDuration(duration)}`
-                : null}
+            <div className="music-meta">
+                <div
+                    className="music-title"
+                    role="button"
+                    title={musicItem.title}
+                    onClick={toggleMusicDetail}
+                >
+                    {musicItem.title}
+                </div>
+                <div className="music-artist" title={musicItem.artist}>
+                    {musicItem.artist || t("music_bar.unknown_artist")}
+                </div>
+            </div>
         </div>
     );
 }

@@ -1,11 +1,68 @@
-.music-bar-container {
-  width: 100vw;
-  height: var(--appMusicBarHeight, 64px);
-  border-top: 1px solid var(--dividerColor);
-  flex-shrink: 0;
+.music-bar-wrapper {
+  position: fixed;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 4000;
+}
+
+.music-bar-progress {
+  flex: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
+}
+
+.music-bar-progress-slider {
+  width: 100%;
+  max-width: 420px;
+  --slider-height: 4px;
+}
+
+.music-bar-progress-track {
+  width: 100%;
+  height: var(--slider-height);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+}
+
+.music-bar-progress-filler {
+  height: 100%;
+  border-radius: inherit;
+  background: white;
+}
+
+.music-bar-progress-slider :global(.nextui-slider-thumb) {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--primaryColor);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.music-bar-container {
+  --music-bar-padding-x: 24px;
+  width: calc(100vw - 32px);
+  max-width: 960px;
+  min-height: var(--appMusicBarHeight, 72px);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  box-sizing: border-box;
+  padding: 16px var(--music-bar-padding-x);
   user-select: none;
   position: relative;
-  z-index: 4000;
+  border-radius: 20px;
+  overflow: visible;
+  pointer-events: auto;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(18px);
 }

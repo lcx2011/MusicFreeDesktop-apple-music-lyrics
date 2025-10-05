@@ -1,45 +1,54 @@
 // 控制区域
 .music-controller {
-  margin-left: 10px;
   flex: 1;
-  height: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
+  gap: 14px;
 
   & .controller-btn {
-    cursor: pointer;
-    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: 8px;
-    margin-right: 8px;
-}
-
-  & .primary-btn {
-    background-color: var(--primaryColor);
-    color: white;
-
-  }
-
-  & .play-or-pause {
-    width: 40px;
-    height: 40px;
+    cursor: pointer;
+    transition: background-color 120ms ease, transform 120ms ease;
+    color: inherit;
 
     & svg {
       width: 24px;
       height: 24px;
     }
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      transform: translateY(-1px);
+    }
   }
 
-  & .skip {
-    width: 34px;
-    height: 34px;
+  & .primary-btn {
+    background-color: var(--primaryColor);
+    color: white;
 
-    & svg {
-      width: 28px;
-      height: 28px;
+    &:hover {
+      background-color: var(--primaryColorActive, var(--primaryColor));
+    }
+  }
+
+  & .controller-btn--play {
+    width: 48px;
+    height: 48px;
+  }
+
+  & .controller-btn--shuffle,
+  & .controller-btn--loop {
+    position: relative;
+
+    &.highlight {
+      color: var(--primaryColor);
+      background-color: rgba(255, 255, 255, 0.12);
     }
   }
 }

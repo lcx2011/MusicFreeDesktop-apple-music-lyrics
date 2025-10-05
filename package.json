@@ -79,6 +79,7 @@
     "@chakra-ui/react": "^3.27.0",
     "@emotion/is-prop-valid": "^1.4.0",
     "@headlessui/react": "^1.7.15",
+    "@heroui/react": "^2.8.5",
     "@pixi/app": "^7.4.3",
     "@pixi/core": "^7.4.3",
     "@pixi/display": "^7.4.3",
