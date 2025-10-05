@@ -22,11 +22,17 @@ import AppConfig from "@shared/app-config/renderer";
 logger.logPerf("Create Bundle");
 bootstrap().then(() => {
     logger.logPerf("Bundle Bootstrap Ready");
-    ReactDOM.createRoot(document.getElementById("root")).render(<ErrorBoundary
-        FallbackComponent={Fallback} onReset={() => {
-            // 删除软件配置
-            AppConfig.reset();
-    }}><Root></Root></ErrorBoundary>);
+    ReactDOM.createRoot(document.getElementById("root")).render(
+        <ErrorBoundary
+            FallbackComponent={Fallback}
+            onReset={() => {
+                // 删除软件配置
+                AppConfig.reset();
+            }}
+        >
+            <Root></Root>
+        </ErrorBoundary>
+    );
 });
 
 function Root() {

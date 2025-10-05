@@ -23,7 +23,8 @@ export function convertToAMLLFormat(lrcItems: IParsedLrcItem[]): LyricLine[] {
           word: item.lrc || "",
         }
       ],
-      translatedLyric: item.translation || undefined,
+      translatedLyric: item.translation ?? "",
+      romanLyric: "",
     };
   });
 }

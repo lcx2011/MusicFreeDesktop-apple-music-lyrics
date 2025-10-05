@@ -1,87 +1,72 @@
 import AnimatedDiv from "../AnimatedDiv";
 import "./index.scss";
-import albumImg from "@/assets/imgs/album-cover.jpg";
-import Tag from "../Tag";
-import {setFallbackAlbum} from "@/renderer/utils/img-on-error";
+import { useLyric, useProgress, useTrackPlayerControls, useRepeatMode, useVolume , useCurrentMusic } from "@renderer/core/track-player/hooks";
+import { useCallback, useEffect, useMemo } from "react";
+import { musicDetailShownStore } from "@renderer/components/MusicDetail/store";
+import { LyricPlayer, BackgroundRender, EplorRenderer } from "@applemusic-like-lyrics/react";
+import { convertToAMLLFormat } from "./utils/lyric-converter";
 import Header from "./widgets/Header";
-import Condition from "../Condition";
-import {useTranslation} from "react-i18next";
-import {
-  useCurrentMusic,
-  useLyric,
-  usePlayerState,
-  useProgress,
-} from "@renderer/core/track-player/hooks";
-import {useEffect, useMemo} from "react";
-import {musicDetailShownStore} from "@renderer/components/MusicDetail/store";
-import {LyricPlayer, BackgroundRender, type LyricLine} from "@applemusic-like-lyrics/react";
-import{PrebuiltLyricPlayer} from "@applemusic-like-lyrics/react-full";
-import {PlayerState} from "@/common/constant";
-import { EplorRenderer } from "@applemusic-like-lyrics/core";
+import albumImg from "@/assets/imgs/album-cover.jpg";
+import trackPlayer from "@renderer/core/track-player";
+import { RepeatMode } from "@/common/constant";
+import PlayIcon from "../../../../res/player/开始.svg";
+import PauseIcon from "../../../../res/player/暂停.svg";
+import NextIcon from "../../../../res/player/下.svg";
+import PreviousIcon from "../../../../res/player/上.svg";
+import ElasticSlider from "./ElasticSlider"
+import SvgAsset from "@/renderer/components/SvgAsset";
 export const isMusicDetailShown = musicDetailShownStore.getValue;
 export const useMusicDetailShown = musicDetailShownStore.useValue;
 
 function MusicDetail() {
-  
-  const musicItem = useCurrentMusic();
   const musicDetailShown = musicDetailShownStore.useValue();
   const lyricContext = useLyric();
-  const progress = useProgress();
-  const playerState = usePlayerState();
+  const { currentTime, duration } = useProgress();
+  const repeatMode = useRepeatMode();
+  const volume = useVolume();
+  const { togglePlay, next, previous, seek, setVolume, isPlaying } = useTrackPlayerControls();
+  const musicItem = useCurrentMusic();
+  const lyricLines = useMemo(() => {
+    const lyricItems = lyricContext?.parser?.getLyricItems?.() ?? [];
+    return convertToAMLLFormat(lyricItems);
+  }, [lyricContext?.parser]);
+  const currentTimeMs = useMemo(() => currentTime * 1000, [currentTime]);
+  const albumUrl = useMemo(() => musicItem?.artwork ?? albumImg, [musicItem?.artwork]);
 
-  const { t } = useTranslation();
+  const formatTime = useCallback((sec?: number) => {
+    if (sec === undefined || sec === null || !isFinite(sec)) return "--:--";
+    const s = Math.max(0, Math.floor(sec));
+    const m = Math.floor(s / 60);
+    const r = s % 60;
+    return `${m}:${r.toString().padStart(2, "0")}`;
+  }, []);
+
+  // 原生 input 已被 ElasticSlider 替代，保留的回调已移除
+
+  const setShuffle = useCallback(() => {
+    trackPlayer.setRepeatMode(RepeatMode.Shuffle);
+  }, []);
+
+  const setLoop = useCallback(() => {
+    trackPlayer.setRepeatMode(RepeatMode.Loop);
+  }, []);
 
   useEffect(() => {
-    const escHandler = (evt: KeyboardEvent) => {
-      if (evt.code === "Escape") {
+    const handler = (evt: KeyboardEvent) => {
+      if (evt.code === "Escape" && musicDetailShown) {
         evt.preventDefault();
         musicDetailShownStore.setValue(false);
       }
+
+      if ((evt.code === "Space" || evt.code === "Enter") && musicDetailShown) {
+        evt.preventDefault();
+        togglePlay();
+      }
     };
-    window.addEventListener("keydown", escHandler);
-    return () => {
-      window.removeEventListener("keydown", escHandler);
-    }
-  }, []);
 
-  const albumImageUrl = musicItem?.artwork ?? albumImg;
-  const isPlaying = playerState === PlayerState.Playing;
-  const currentTimeMs = Math.max(0, Math.floor((progress?.currentTime ?? 0) * 1000));
-
-  const lyricLines: LyricLine[] = useMemo(() => {
-    const parser = lyricContext?.parser;
-    if (!parser?.getLyricItems) {
-      return [];
-    }
-
-    const items = parser.getLyricItems() ?? [];
-    if (!items.length) {
-      return [];
-    }
-
-    return items.map((item, index) => {
-      const next = items[index + 1];
-      const startTime = Math.max(0, Math.floor(item.time * 1000));
-      const endTime = next
-        ? Math.max(startTime + 1, Math.floor(next.time * 1000))
-        : startTime + 4000;
-
-      return {
-        startTime,
-        endTime,
-        words: [
-          {
-            startTime,
-            endTime,
-            word: item.lrc || "\u00A0",
-          },
-        ],
-        translatedLyric: item.translation ?? "",
-        romanLyric: "",
-      } satisfies LyricLine;
-    });
-  }, [lyricContext?.parser]);
-console.log(lyricLines);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [musicDetailShown, togglePlay]);
   return (
     <AnimatedDiv
       showIf={musicDetailShown}
@@ -89,8 +74,6 @@ console.log(lyricLines);
       mountClassName="animate__slideInUp"
       unmountClassName="animate__slideOutDown"
       onAnimationEnd={() => {
-        // hack logic: https://github.com/electron/electron/issues/32341
-        // force reflow to refresh drag region
         setTimeout(() => {
           document.body.style.width = "0";
           document.body.getBoundingClientRect();
@@ -98,62 +81,100 @@ console.log(lyricLines);
         }, 200);
       }}
     >
-      <div className="music-detail--background">
-        <BackgroundRender
-          album={albumImageUrl}
-          renderer={EplorRenderer}
-          style={{ width: "100%", height: "100%" }}
-        />
-        <div className="music-detail--background-overlay" />
+      <div className="music-detail--header">
+        <Header></Header>
       </div>
-      <Header></Header>
-      <div className="music-detail--content">
-        <div className="music-detail--left">
-          <div
-            className={`music-detail--album ${isPlaying ? "playing" : ""}`}
-            title={musicItem?.title}
-          >
-            <img
-              onError={setFallbackAlbum}
-              src={albumImageUrl}
-              alt={musicItem?.title ?? "album"}
-            />
-          </div>
-          <div className="music-title" title={musicItem?.title}>
-            {musicItem?.title || t("media.unknown_title")}
-          </div>
-          <div className="music-info">
-            <span>
-              <Condition condition={musicItem?.artist}>
-                {musicItem?.artist}
-              </Condition>
-              <Condition condition={musicItem?.album}>
-                {" "}
-                - {musicItem?.album}
-              </Condition>
-            </span>
-            {musicItem?.platform ? <Tag fill>{musicItem.platform}</Tag> : null}
-          </div>
-        </div>
-        <div className="music-detail--center">
-          <div className="music-detail--lyric">
-            {lyricLines.length > 0 ? (
-              
-              <LyricPlayer
-                lyricLines={lyricLines}
-                currentTime={currentTimeMs+500}
-                style={{ width: "100%", height: "100%" }}
+
+      {/* Background as visual layer behind content */}
+      <div className="amll-bg">
+        <BackgroundRender album={albumUrl} renderer={EplorRenderer}/>
+      </div>
+      <div className="main">
+        <div className="left">
+            <div className="music-album">
+              <img src={albumUrl} alt="cover" />
+            </div>
+          {/* Controls under album */}
+          <div className="album-controls">
+            {/* Row 1: title + menu */}
+            <div className="row title-row">
+              <div className="title" title={musicItem?.title || ""}>{musicItem?.title || ""}</div>
+              <button className="menu-btn" aria-label="more" onClick={() => { /* TODO: open menu */ }}>
+                ⋯   
+              </button>
+            </div>
+
+            {/* Row 2: progress */}
+            <div className="row progress-row">
+              <ElasticSlider
+                className="progress"
+                leftIcon={<></>}
+                rightIcon={<></>}
+                startingValue={0}
+                defaultValue={isFinite(duration) ? Math.min(Math.max(0, currentTime), Math.max(0, duration)) : 0}
+                maxValue={isFinite(duration) ? Math.max(0, duration) : 0}
+                showValueIndicator={false}
+                onChange={(val) => seek(val)}
               />
-            ) : (
-              <div className="music-detail--lyric-empty">
-                {lyricContext === null
-                  ? t("music_detail.loading_lyric")
-                  : t("music_detail.no_lyric")}
-              </div>
-            )}
+            </div>
+            {/* Row 2.1: times under progress */}
+            <div className="row time-row">
+              <span className="time current">{formatTime(currentTime)}</span>
+              <span className="time duration">{formatTime(isFinite(duration) ? duration : undefined)}</span>
+            </div>
+
+            {/* Row 3: controls */}
+            <div className="row controls-row">
+              <button
+                className="ctrl shuffle"
+                data-active={repeatMode === RepeatMode.Shuffle}
+                title="Shuffle"
+                onClick={setShuffle}
+              >
+                <SvgAsset iconName="shuffle" size={30} title="Shuffle" color="white" />
+              </button>
+              <button className="ctrl prev" title="Previous" onClick={previous}>
+                  <PreviousIcon title="上一首" style={{ width: "30px", height: "30px", color: "white" }}/>
+              </button>
+              <button className="ctrl play" title={isPlaying ? "Pause" : "Play"} onClick={togglePlay}>
+              {isPlaying ? <PlayIcon title="开始" style={{ width: "30px", height: "30px", color: "white" }}/> : <PauseIcon title="暂停" style={{ width: "30px", height: "30px", color: "white" }}/>}
+              </button>
+              <button className="ctrl next" title="Next" onClick={next}>
+                  <NextIcon title="下一首" style={{ width: "30px", height: "30px", color: "white" }}/>
+              </button>
+              <button
+                className="ctrl loop"
+                data-active={repeatMode === RepeatMode.Loop}
+                title="Loop"
+                onClick={setLoop}
+              >
+                <SvgAsset iconName="repeat-song" size={30} title="Loop" color="white" />
+              </button>
+            </div>
+
+            {/* Row 4: volume */}
+            <div className="row volume-row">
+              <ElasticSlider
+                className="volume"
+                startingValue={0}
+                defaultValue={typeof volume === "number" ? Math.min(Math.max(0, volume * 100), 100) : 0}
+                maxValue={100}
+                showValueIndicator={false}
+
+                onChange={(val) => setVolume(val/100)}
+              />
+            </div>
           </div>
+
         </div>
-        <div className="music-detail--right" />
+        <div className="music-lyric-only">
+          <LyricPlayer
+            lyricLines={lyricLines}
+            currentTime={currentTimeMs+500}
+            alignPosition={0.3}
+            style={{ height: "100%", width: "100%" }}
+          />
+        </div>
       </div>
     </AnimatedDiv>
   );
