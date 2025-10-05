@@ -1,4 +1,7 @@
 .music-detail--container {
+  --album-size: clamp(260px, 42vh, 420px);
+  --control-size: 62px;
+
   position: absolute;
   top: 0;
   left: 0;
@@ -43,7 +46,9 @@
 
   /* Album controls under the album cover */
   & .album-controls {
-    width: 65%;
+    width: 100%;
+    max-width: var(--album-size);
+    margin: 0 auto;
     /* match album width */
     margin-top: 12px;
     display: flex;
@@ -134,13 +139,15 @@
         line-height: 1;
         border-radius: 50%;
         transition: background-color 0.2s ease-in-out;
+        flex: 0 0 var(--control-size);
+        aspect-ratio: 1 / 1;
 
         &:hover {
           background-color: rgba(255, 255, 255, 0.3);
         }
 
-        height: 62px;
-        width: 62px;
+        height: var(--control-size);
+        width: var(--control-size);
 
         // 为SVG图标添加特殊样式
         & svg {
@@ -248,24 +255,30 @@
   }
 
   & .left {
-    flex: 0 0 45%;
+    flex: 0 0 auto;
+    width: min(var(--album-size), 80vw);
+    max-width: var(--album-size);
     min-width: 0;
     display: flex;
     flex-direction: column;
     /* stack album and controls vertically */
     justify-content: flex-start;
-    align-items: center;
+    align-items: stretch;
+    margin-left: 10%;
+    gap: 12px;
   }
 
   & .music-album {
     position: relative;
-    width: 350px;
+    width: 100%;
+    max-width: var(--album-size);
     aspect-ratio: 1 / 1;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
     transform: translateY(-6px);
     /* slight up-shift for better visual balance */
+    flex-shrink: 0;
 
     & img {
       width: 100%;
@@ -298,7 +311,7 @@
   /* Lyric area pinned to the right with full screen height */
   & .music-lyric-only {
     width: 51%;
-    margin-left: auto;
+    margin-left: 8%;
     margin-right: 4%;
     /* occupy remaining vertical space in column layout */
     flex: 1;
