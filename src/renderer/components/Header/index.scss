@@ -32,12 +32,9 @@
 
     & .header-search {
       -webkit-app-region: none;
-      background-color: var(
-        --headerPlaceholderColor,
-        rgba($color: #000, $alpha: 0.14)
-      );
+      background-color: var(--headerPlaceholderColor);
       position: relative;
-      min-width: 220px;
+      min-width: 280px;
       border-radius: 8px;
       padding: 0.5rem 8px;
       display: flex;
@@ -131,18 +128,23 @@
   0% {
     transform: translate(0);
   }
+
   20% {
     transform: translate(-1px, 1px);
   }
+
   40% {
     transform: translate(-1px, -1px);
   }
+
   60% {
     transform: translate(1px, 1px);
   }
+
   80% {
     transform: translate(1px, -1px);
   }
+
   100% {
     transform: translate(0);
   }

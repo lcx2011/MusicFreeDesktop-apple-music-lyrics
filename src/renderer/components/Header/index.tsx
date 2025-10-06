@@ -2,14 +2,10 @@ import SvgAsset from "../SvgAsset";
 import "./index.scss";
 import {showModal} from "../Modal";
 import {useNavigate} from "react-router-dom";
-import {useRef, useState} from "react";
+import {useRef} from "react";
 import HeaderNavigator from "./widgets/Navigator";
 import MusicDetail from "../MusicDetail";
-import Condition from "../Condition";
-import SearchHistory from "./widgets/SearchHistory";
-import {addSearchHistory} from "@/renderer/utils/search-history";
 import {useTranslation} from "react-i18next";
-import useAppConfig from "@/hooks/useAppConfig";
 import AppConfig from "@shared/app-config/renderer";
 import {appUtil, appWindowUtil} from "@shared/utils/renderer";
 import {musicDetailShownStore} from "@renderer/components/MusicDetail/store";
@@ -17,16 +13,8 @@ import {musicDetailShownStore} from "@renderer/components/MusicDetail/store";
 export default function AppHeader() {
     const navigate = useNavigate();
     const inputRef = useRef<HTMLInputElement>();
-    const [showSearchHistory, setShowSearchHistory] = useState(false);
-    const isHistoryFocusRef = useRef(false);
-
-    const isMiniMode = useAppConfig("private.minimode");
-
+    
     const {t} = useTranslation();
-
-    if (!showSearchHistory) {
-        isHistoryFocusRef.current = false;
-    }
 
     function onSearchSubmit() {
         if (inputRef.current.value) {
@@ -37,8 +25,6 @@ export default function AppHeader() {
     function search(keyword: string) {
         navigate(`/main/search/${encodeURIComponent(keyword)}`);
         musicDetailShownStore.setValue(false);
-        addSearchHistory(keyword);
-        setShowSearchHistory(false);
     }
 
     return (
@@ -52,45 +38,17 @@ export default function AppHeader() {
                     <input
                         ref={inputRef}
                         className="header-search-input"
-                        placeholder={t("app_header.search_placeholder")}
+                        placeholder="搜索"
                         maxLength={50}
-                        onClick={() => {
-                            setShowSearchHistory(true);
-                        }}
                         onKeyDown={(key) => {
                             if (key.key === "Enter") {
                                 onSearchSubmit();
                             }
                         }}
-                        onFocus={() => {
-                            setShowSearchHistory(true);
-                        }}
-                        onBlur={() => {
-                            setTimeout(() => {
-                                if (!isHistoryFocusRef.current) {
-                                    setShowSearchHistory(false);
-                                }
-                            }, 0);
-                        }}
                     ></input>
                     <div className="search-submit" role="button" onClick={onSearchSubmit}>
                         <SvgAsset iconName="magnifying-glass"></SvgAsset>
                     </div>
-                    <Condition condition={showSearchHistory}>
-                        <SearchHistory
-                            onHistoryClick={(item) => {
-                                search(item);
-                            }}
-                            onHistoryPanelBlur={() => {
-                                isHistoryFocusRef.current = false;
-                                setShowSearchHistory(false);
-                            }}
-                            onHistoryPanelFocus={() => {
-                                isHistoryFocusRef.current = true;
-                                setShowSearchHistory(true);
-                            }}
-                        ></SearchHistory>
-                    </Condition>
                 </div>
             </div>
 
@@ -107,17 +65,6 @@ export default function AppHeader() {
                 <div
                     role="button"
                     className="header-button"
-                    title={t("app_header.theme")}
-                    onClick={() => {
-                        navigate("/main/theme");
-                        MusicDetail.hide();
-                    }}
-                >
-                    <SvgAsset iconName="t-shirt-line"></SvgAsset>
-                </div>
-                <div
-                    role="button"
-                    className="header-button"
                     title={t("app_header.settings")}
                     onClick={() => {
                         navigate("/main/setting");
@@ -127,19 +74,6 @@ export default function AppHeader() {
                     <SvgAsset iconName="cog-8-tooth"></SvgAsset>
                 </div>
                 <div className="header-divider"></div>
-                <div
-                    role="button"
-                    title={t("app_header.minimode")}
-                    className="header-button"
-                    onClick={() => {
-                        appWindowUtil.setMinimodeWindow(!isMiniMode);
-                        if (!isMiniMode) {
-                            appWindowUtil.minMainWindow(true);
-                        }
-                    }}
-                >
-                    <SvgAsset iconName="picture-in-picture-line"></SvgAsset>
-                </div>
                 <div
                     role="button"
                     title={t("app_header.minimize")}
