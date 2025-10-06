@@ -1,11 +1,62 @@
 .side-bar-container {
+  height: 100%;
+  flex-shrink: 0;
+  flex-grow: 0;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 12px 0;
+  border-right: 1px solid var(--dividerColor);
+  position: relative;
+  background: var(--backgroundColor);
+  display: flex;
+  flex-direction: column;
+  transition: width 160ms ease;
+  width: 64px;
+
+  &.is-expanded {
     width: 220px;
-    height: 100%;
+  }
+}
+
+.side-bar__menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 8px;
+}
+
+.side-bar__item {
+  height: 40px;
+  border: none;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--textColor);
+  transition: background 120ms ease, color 120ms ease;
+  padding: 0 12px;
+
+  &[data-selected="true"] {
+    background: var(--listActiveColor);
+    color: var(--primaryColor);
+  }
+
+  &:hover {
+    background: var(--listHoverColor);
+  }
+
+  & svg {
     flex-shrink: 0;
-    flex-grow: 0;
-    overflow-y: auto;
-    box-sizing: border-box;
-    padding: 12px 0;
-    border-right:1px solid var(--dividerColor);
-    position: relative;
+  }
+
+  & span {
+    flex: 1;
+    text-align: left;
+    font-size: 14px;
+    white-space: nowrap;
+  }
 }
