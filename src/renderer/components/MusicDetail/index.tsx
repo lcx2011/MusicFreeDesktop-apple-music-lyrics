@@ -1,24 +1,35 @@
 import AnimatedDiv from "../AnimatedDiv";
 import "./index.scss";
-import { useLyric, useProgress, useTrackPlayerControls, useRepeatMode, useVolume , useCurrentMusic } from "@renderer/core/track-player/hooks";
+import { useLyric, useProgress, useTrackPlayerControls, useRepeatMode, useVolume, useCurrentMusic } from "@renderer/core/track-player/hooks";
 import { useCallback, useEffect, useMemo } from "react";
 import { musicDetailShownStore } from "@renderer/components/MusicDetail/store";
 import { LyricPlayer, BackgroundRender } from "@applemusic-like-lyrics/react";
-import { EplorRenderer } from "@applemusic-like-lyrics/core";
 import { convertToAMLLFormat } from "./utils/lyric-converter";
 import Header from "./widgets/Header";
 import albumImg from "@/assets/imgs/album-cover.jpg";
 import trackPlayer from "@renderer/core/track-player";
 import { RepeatMode } from "@/common/constant";
-import { ReactComponent as PlayIcon } from "../../../../res/player/开始.svg";
-import { ReactComponent as PauseIcon } from "../../../../res/player/暂停.svg";
-import { ReactComponent as NextIcon } from "../../../../res/player/下.svg";
-import { ReactComponent as PreviousIcon } from "../../../../res/player/上.svg";
-
-import ElasticSlider from "./ElasticSlider";
+import PlayIcon from "../../../../res/player/开始.svg";
+import PauseIcon from "../../../../res/player/暂停.svg";
+import NextIcon from "../../../../res/player/下.svg";
+import PreviousIcon from "../../../../res/player/上.svg";
+import ElasticSlider from "./ElasticSlider"
 import SvgAsset from "@/renderer/components/SvgAsset";
+
 export const isMusicDetailShown = musicDetailShownStore.getValue;
 export const useMusicDetailShown = musicDetailShownStore.useValue;
+
+// 创建通用的图标包装组件
+const IconWrapper: React.FC<{
+  children: React.ReactNode;
+  title?: string;
+  className?: string;
+}> = ({ children, title, className = "" }) => (
+  <div className={`icon-wrapper ${className}`} title={title}>
+    {children}
+  </div>
+);
+
 function MusicDetail() {
   const musicDetailShown = musicDetailShownStore.useValue();
   const lyricContext = useLyric();
@@ -41,8 +52,6 @@ function MusicDetail() {
     const r = s % 60;
     return `${m}:${r.toString().padStart(2, "0")}`;
   }, []);
-
-  // 原生 input 已被 ElasticSlider 替代，保留的回调已移除
 
   const setShuffle = useCallback(() => {
     trackPlayer.setRepeatMode(RepeatMode.Shuffle);
@@ -68,6 +77,7 @@ function MusicDetail() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [musicDetailShown, togglePlay]);
+
   return (
     <AnimatedDiv
       showIf={musicDetailShown}
@@ -88,11 +98,7 @@ function MusicDetail() {
 
       {/* Background as visual layer behind content */}
       <div className="amll-bg">
-        <BackgroundRender
-          album={albumUrl}
-          renderer={EplorRenderer}
-          playing={isPlaying}
-        />
+        <BackgroundRender album={albumUrl}/>
       </div>
       <div className="main">
         <div className="left">
@@ -138,14 +144,20 @@ function MusicDetail() {
               >
                 <SvgAsset iconName="shuffle" size={30} title="Shuffle" color="white" />
               </button>
-              <button className="ctrl prev" title="Previous" onClick={previous}>
-                  <PreviousIcon width={30} height={30} />
+              <button className="ctrl prev" title="上一首" onClick={previous}>
+                <IconWrapper title="上一首">
+                  <PreviousIcon />
+                </IconWrapper>
               </button>
-              <button className="ctrl play" title={isPlaying ? "Pause" : "Play"} onClick={togglePlay}>
-              {isPlaying ? <PlayIcon width={30} height={30} /> : <PauseIcon width={30} height={30} />}
+              <button className="ctrl play" title={isPlaying ? "暂停" : "开始"} onClick={togglePlay}>
+                <IconWrapper title={isPlaying ? "暂停" : "开始"}>
+                  {isPlaying ? <PlayIcon /> : <PauseIcon />}
+                </IconWrapper>
               </button>
-              <button className="ctrl next" title="Next" onClick={next}>
-                  <NextIcon width={30} height={30} />
+              <button className="ctrl next" title="下一首" onClick={next}>
+                <IconWrapper title="下一首">
+                  <NextIcon />
+                </IconWrapper>
               </button>
               <button
                 className="ctrl loop"
@@ -165,7 +177,6 @@ function MusicDetail() {
                 defaultValue={typeof volume === "number" ? Math.min(Math.max(0, volume * 100), 100) : 0}
                 maxValue={100}
                 showValueIndicator={false}
-
                 onChange={(val) => setVolume(val/100)}
               />
             </div>
@@ -175,7 +186,7 @@ function MusicDetail() {
         <div className="music-lyric-only">
           <LyricPlayer
             lyricLines={lyricLines}
-            currentTime={currentTimeMs + 500}
+            currentTime={currentTimeMs+500}
             alignPosition={0.3}
             style={{ height: "100%", width: "100%" }}
           />

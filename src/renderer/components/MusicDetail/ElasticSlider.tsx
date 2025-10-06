@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { animate, motion, useMotionValue, useMotionValueEvent, useTransform } from "motion/react";
-import { RiVolumeDownFill, RiVolumeUpFill } from "react-icons/ri";
+// 直接导入类型，避免组件类型问题
+import type { ReactNode } from "react";
 
 import "./ElasticSlider.scss";
 
@@ -13,8 +14,8 @@ interface ElasticSliderProps {
   className?: string;
   isStepped?: boolean;
   stepSize?: number;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
+  leftIcon?: ReactNode;
+  rightIcon?: ReactNode;
   onChange?: (value: number) => void;
   onChangeEnd?: (value: number) => void;
   showValueIndicator?: boolean;
@@ -27,8 +28,9 @@ const ElasticSlider: React.FC<ElasticSliderProps> = ({
   className = "",
   isStepped = false,
   stepSize = 1,
-  leftIcon = React.createElement(RiVolumeDownFill as any),
-  rightIcon = React.createElement(RiVolumeUpFill as any),
+  // 移除默认图标，让调用方提供
+  leftIcon,
+  rightIcon,
   onChange,
   onChangeEnd,
   showValueIndicator = true
@@ -57,8 +59,8 @@ interface SliderProps {
   maxValue: number;
   isStepped: boolean;
   stepSize: number;
-  leftIcon: React.ReactNode;
-  rightIcon: React.ReactNode;
+  leftIcon?: ReactNode;
+  rightIcon?: ReactNode;
   onChange?: (value: number) => void;
   onChangeEnd?: (value: number) => void;
   showValueIndicator?: boolean;
