@@ -27,8 +27,8 @@ const ElasticSlider: React.FC<ElasticSliderProps> = ({
   className = "",
   isStepped = false,
   stepSize = 1,
-  leftIcon = <RiVolumeDownFill />,
-  rightIcon = <RiVolumeUpFill />,
+  leftIcon = React.createElement(RiVolumeDownFill as any),
+  rightIcon = React.createElement(RiVolumeUpFill as any),
   onChange,
   onChangeEnd,
   showValueIndicator = true

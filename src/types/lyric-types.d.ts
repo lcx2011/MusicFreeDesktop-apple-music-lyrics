@@ -1,5 +1,7 @@
 // 临时类型定义，解决 @applemusic-like-lyrics/react 的类型问题
 declare module "@applemusic-like-lyrics/react" {
+  import type { CSSProperties, FC } from "react";
+
   export interface LyricLine {
     startTime: number;
     endTime: number;
@@ -15,23 +17,33 @@ declare module "@applemusic-like-lyrics/react" {
   }
 
   export interface LyricPlayerProps {
+    disabled?: boolean;
+    playing?: boolean;
     lyricLines?: LyricLine[];
     currentTime?: number;
-    alignAnchor?: number | "top" | "bottom";
+    alignAnchor?: "top" | "bottom" | "center";
+    alignPosition?: number;
     enableBlur?: boolean;
     enableSpring?: boolean;
-    style?: React.CSSProperties;
+    enableScale?: boolean;
+    hidePassedLines?: boolean;
+    style?: CSSProperties;
   }
 
   export interface BackgroundRenderProps {
-    albumImageUrl?: string;
+    album?: string | HTMLImageElement | HTMLVideoElement;
+    albumIsVideo?: boolean;
     playing?: boolean;
     fps?: number;
     flowSpeed?: number;
+    hasLyric?: boolean;
+    lowFreqVolume?: number;
     renderScale?: number;
-    style?: React.CSSProperties;
+    staticMode?: boolean;
+    renderer?: { new (canvas: HTMLCanvasElement): unknown };
+    style?: CSSProperties;
   }
 
-  export const LyricPlayer: React.FC<LyricPlayerProps>;
-  export const BackgroundRender: React.FC<BackgroundRenderProps>;
+  export const LyricPlayer: FC<LyricPlayerProps>;
+  export const BackgroundRender: FC<BackgroundRenderProps>;
 }

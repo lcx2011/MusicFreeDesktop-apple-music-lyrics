@@ -3,21 +3,22 @@ import "./index.scss";
 import { useLyric, useProgress, useTrackPlayerControls, useRepeatMode, useVolume , useCurrentMusic } from "@renderer/core/track-player/hooks";
 import { useCallback, useEffect, useMemo } from "react";
 import { musicDetailShownStore } from "@renderer/components/MusicDetail/store";
-import { LyricPlayer, BackgroundRender, EplorRenderer } from "@applemusic-like-lyrics/react";
+import { LyricPlayer, BackgroundRender } from "@applemusic-like-lyrics/react";
+import { EplorRenderer } from "@applemusic-like-lyrics/core";
 import { convertToAMLLFormat } from "./utils/lyric-converter";
 import Header from "./widgets/Header";
 import albumImg from "@/assets/imgs/album-cover.jpg";
 import trackPlayer from "@renderer/core/track-player";
 import { RepeatMode } from "@/common/constant";
-import PlayIcon from "../../../../res/player/开始.svg";
-import PauseIcon from "../../../../res/player/暂停.svg";
-import NextIcon from "../../../../res/player/下.svg";
-import PreviousIcon from "../../../../res/player/上.svg";
-import ElasticSlider from "./ElasticSlider"
+import { ReactComponent as PlayIcon } from "../../../../res/player/开始.svg";
+import { ReactComponent as PauseIcon } from "../../../../res/player/暂停.svg";
+import { ReactComponent as NextIcon } from "../../../../res/player/下.svg";
+import { ReactComponent as PreviousIcon } from "../../../../res/player/上.svg";
+
+import ElasticSlider from "./ElasticSlider";
 import SvgAsset from "@/renderer/components/SvgAsset";
 export const isMusicDetailShown = musicDetailShownStore.getValue;
 export const useMusicDetailShown = musicDetailShownStore.useValue;
-
 function MusicDetail() {
   const musicDetailShown = musicDetailShownStore.useValue();
   const lyricContext = useLyric();
@@ -87,7 +88,11 @@ function MusicDetail() {
 
       {/* Background as visual layer behind content */}
       <div className="amll-bg">
-        <BackgroundRender album={albumUrl} renderer={EplorRenderer}/>
+        <BackgroundRender
+          album={albumUrl}
+          renderer={EplorRenderer}
+          playing={isPlaying}
+        />
       </div>
       <div className="main">
         <div className="left">
@@ -134,13 +139,13 @@ function MusicDetail() {
                 <SvgAsset iconName="shuffle" size={30} title="Shuffle" color="white" />
               </button>
               <button className="ctrl prev" title="Previous" onClick={previous}>
-                  <PreviousIcon title="上一首" style={{ width: "30px", height: "30px", color: "white" }}/>
+                  <PreviousIcon width={30} height={30} />
               </button>
               <button className="ctrl play" title={isPlaying ? "Pause" : "Play"} onClick={togglePlay}>
-              {isPlaying ? <PlayIcon title="开始" style={{ width: "30px", height: "30px", color: "white" }}/> : <PauseIcon title="暂停" style={{ width: "30px", height: "30px", color: "white" }}/>}
+              {isPlaying ? <PlayIcon width={30} height={30} /> : <PauseIcon width={30} height={30} />}
               </button>
               <button className="ctrl next" title="Next" onClick={next}>
-                  <NextIcon title="下一首" style={{ width: "30px", height: "30px", color: "white" }}/>
+                  <NextIcon width={30} height={30} />
               </button>
               <button
                 className="ctrl loop"
@@ -170,7 +175,7 @@ function MusicDetail() {
         <div className="music-lyric-only">
           <LyricPlayer
             lyricLines={lyricLines}
-            currentTime={currentTimeMs+500}
+            currentTime={currentTimeMs + 500}
             alignPosition={0.3}
             style={{ height: "100%", width: "100%" }}
           />
