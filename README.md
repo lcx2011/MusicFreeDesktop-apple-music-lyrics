@@ -2,6 +2,7 @@
 ## 二次开发
 本项目是https://github.com/maotoumao/MusicFreeDesktop 的二次开发，加入了Apple Music歌词显示功能。删除了部分多于功能，界面更加干净整洁，仿照apple music的界面。
 <img src="./.imgs/detail.png" title="展示" style="display:inherit;"/>
+<img src="./.imgs/search.png" title="展示" style="display:inherit;"/>
 ## 项目使用约定：
 本项目基于 AGPL 3.0 协议开源，使用此项目时请遵守开源协议。  
 除此外，希望你在使用代码时已经了解以下额外说明：
